@@ -1,3 +1,12 @@
+##################
+Title:            Dosing Weight Report
+Summary           Retrieves retrives dosing weights entered. Filter by event start date & Time, DOB & specific MRNs.     
+Date Created:     19/06/2025
+Last Updated;     19/06/2025
+Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/Dosing_weight
+Email:            lohagan@rotunda.ie
+##################
+
 SELECT
       NAME = (P.NAME_FULL_FORMATTED)
     , MRN = (PA.ALIAS)
