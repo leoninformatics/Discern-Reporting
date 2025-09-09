@@ -1,0 +1,129 @@
+SELECT 
+
+NAME = (P.NAME_FULL_FORMATTED)
+
+, MRN = (PA.ALIAS)
+
+, DOB = (P.BIRTH_DT_TM) "DD/MM/YYYY"
+
+, o.order_id
+
+, MAE.beg_dt_tm "DD/MM/YYYY HH:MM"
+
+;, ADMIN_DOSE = ce.result_val
+
+, ADMIN_DOSE = cnvtreal(ce.result_val)
+
+, ADMIN_UNIT = UAR_GET_CODE_DISPLAY(CE.RESULT_UNITS_CD)
+
+, oi.order_mnemonic
+
+, MEDICATION_NAME = O.ORDERED_AS_MNEMONIC
+
+, GENERIC_NAME = O.HNA_ORDER_MNEMONIC
+
+, uar_get_code_description(MAE.event_type_cd)
+
+;, PA_ALIAS_POOL_DK = UAR_GET_DISPLAYKEY(PA.ALIAS_POOL_CD)
+
+, O.CLINICAL_DISPLAY_LINE
+
+, MED_TYPE = UAR_GET_CODE_DISPLAY(O.MED_ORDER_TYPE_CD)
+
+, O.CURRENT_START_DT_TM "DD/MM/YYYY"
+
+, O.DISCONTINUE_EFFECTIVE_DT_TM "DD/MM/YYYY"
+
+, HOSPITAL = UAR_GET_CODE_DISPLAY(E.LOC_FACILITY_CD)
+
+, BUILDING = UAR_GET_CODE_DISPLAY(E.LOC_BUILDING_CD)
+
+, WARD = UAR_GET_CODE_DISPLAY(E.LOC_NURSE_UNIT_CD)
+
+;, PRESCRIBER = PR.NAME_FULL_FORMATTED
+
+;, PRESCRIBER ID = PR.PERSON_ID
+
+;, PRESCRIBER ROLE = PR_POSITION_DISP = UAR_GET_CODE_DISPLAY(PR.POSITION_CD)
+
+, CE_RESULT_STATUS_DISP = UAR_GET_CODE_DISPLAY(CE.RESULT_STATUS_CD)
+
+FROM
+
+MED_ADMIN_EVENT MAE
+
+, CLINICAL_EVENT CE
+
+, ORDERS O
+
+, ORDER_INGREDIENT OI
+
+, PERSON P
+
+, PERSON_ALIAS PA
+
+, ALIAS_POOL A
+
+, ENCOUNTER E
+
+; date range for administrations
+
+PLAN MAE WHERE mae.beg_dt_tm between cnvtdatetime("01-SEPT-2025 00:00:00") and cnvtdatetime("07-SEPT-2025 23:59:59") ; Admin dates
+
+AND mae.event_type_cd in (8912520.00,8912522.00,8912523.00) ; "Administered, Not Done, Not Given" from codeset 4000040
+
+JOIN CE WHERE ce.event_id = mae.event_id
+
+AND ce.result_status_cd in (25.0, 35.0) ; auth, modified
+
+AND ce.valid_until_dt_tm > cnvtdatetime(curdate, curtime)
+
+JOIN O WHERE o.order_id = mae.template_order_id
+
+AND o.active_ind = 1
+
+AND O.HNA_ORDER_MNEMONIC = "Nirsevimab" ; define medication to search for here
+
+;AND O.ORDER_ID = 55504579
+
+JOIN OI WHERE oi.order_id = o.order_id
+
+AND oi.action_sequence = o.last_ingred_action_sequence
+
+JOIN P WHERE O.PERSON_ID = P.PERSON_ID
+
+;AND P.BIRTH_DT_TM between cnvtdatetime("01-SEPT-2025 00:00:00") and cnvtdatetime("07-SEPT-2025 23:59:59") ; BIRTH dates
+
+AND P.NAME_FULL_FORMATTED != "Zzztest, *" 
+
+AND P.NAME_FULL_FORMATTED != "Test Patient, *"
+
+JOIN PA WHERE PA.PERSON_ID = P.PERSON_ID
+
+AND PA.PERSON_ALIAS_TYPE_CD = 10.00 ;MRN              
+
+AND PA.ALIAS_POOL_CD = 14504365 
+
+;AND PA.alias_pool_cd = 14504365.00 OR PA.alias_pool_cd = 18991198.00 
+
+;(SOUTHMRN 18991198.00, ROT MRN 14504365, NMH MRN 14504359)
+
+AND PA.PERSON_ALIAS_TYPE_CD = 10.00 ;MRN
+
+JOIN A WHERE A.ALIAS_POOL_CD = PA.ALIAS_POOL_CD
+
+JOIN E WHERE E.ENCNTR_ID = O.ENCNTR_ID
+
+AND E.loc_facility_cd = 14504354
+
+;(CUMH 14437846, UHK 14504356, ROH 14504354, NMH 14504352)
+
+ORDER BY
+
+NAME
+
+, GENERIC_NAME
+
+, o.order_id
+
+WITH MAXREC = 20000, time = 300
