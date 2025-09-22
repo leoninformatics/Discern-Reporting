@@ -4,7 +4,7 @@ Title:            PN Administration Report - Specific MRNs for Sean Armstrong qu
 Summary           Retrieves PN1 and PN2 administrations. Filter by event start date & Time, DOB & specific MRNs.     
 Date Created:     19/09/2025
 Last Updated;     19/09/2025
-Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/PN_Administration_Report
+Github link:      https://github.com/leoninformatics/Discern-Reporting/blob/main/PN_Administration_Report
 Email:            lohagan@rotunda.ie
 ##################
 */
