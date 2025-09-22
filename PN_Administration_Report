@@ -1,0 +1,104 @@
+/*
+##################
+Title:            PN Administration Report - Specific MRNs for Sean Armstrong query
+Summary           Retrieves PN1 and PN2 administrations. Filter by event start date & Time, DOB & specific MRNs.     
+Date Created:     19/09/2025
+Last Updated;     19/09/2025
+Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/PN_Administration_Report
+Email:            lohagan@rotunda.ie
+##################
+*/
+
+SELECT
+    NAME = P.NAME_FULL_FORMATTED
+    , MRN = PA.ALIAS
+    , DOB = P.BIRTH_DT_TM "DD/MM/YYYY"
+    , ORDER_ID = O.ORDER_ID
+    , ADMIN_DT_TM = MAE.BEG_DT_TM "DD/MM/YYYY HH:MM"
+    , ADMIN_DOSE = CNVTREAL(CE.RESULT_VAL)
+    , ADMIN_UNIT = UAR_GET_CODE_DISPLAY(CE.RESULT_UNITS_CD)
+    , ORDER_MNEMONIC = OI.ORDER_MNEMONIC
+    , MEDICATION_NAME = O.ORDERED_AS_MNEMONIC
+    , GENERIC_NAME = O.HNA_ORDER_MNEMONIC
+    , EVENT_TYPE = UAR_GET_CODE_DESCRIPTION(MAE.EVENT_TYPE_CD)
+    , CLINICAL_DISPLAY_LINE = O.CLINICAL_DISPLAY_LINE
+    , MED_TYPE = UAR_GET_CODE_DISPLAY(O.MED_ORDER_TYPE_CD)
+    , ORDER_START_DT = O.CURRENT_START_DT_TM "DD/MM/YYYY"
+    , ORDER_DISCONTINUE_DT = O.DISCONTINUE_EFFECTIVE_DT_TM "DD/MM/YYYY"
+    , HOSPITAL = UAR_GET_CODE_DISPLAY(E.LOC_FACILITY_CD)
+    , BUILDING = UAR_GET_CODE_DISPLAY(E.LOC_BUILDING_CD)
+    , WARD = UAR_GET_CODE_DISPLAY(E.LOC_NURSE_UNIT_CD)
+    , RESULT_STATUS = UAR_GET_CODE_DISPLAY(CE.RESULT_STATUS_CD)
+FROM
+    MED_ADMIN_EVENT   MAE
+    , CLINICAL_EVENT   CE
+    , ORDERS   O
+    , ORDER_INGREDIENT   OI
+    , PERSON   P
+    , PERSON_ALIAS   PA
+    , ENCOUNTER   E
+
+; Filter by administration date range
+PLAN MAE WHERE MAE.BEG_DT_TM BETWEEN 
+        CNVTDATETIME("01-JAN-2024 00:00:00") 
+        AND 
+        CNVTDATETIME("31-DEC-2024 23:59:59")
+    ; Event types: Administered, Not Done, Not Given (codeset 4000040)
+    AND MAE.EVENT_TYPE_CD IN (8912520.00, 8912522.00, 8912523.00)
+
+JOIN CE WHERE CE.EVENT_ID = MAE.EVENT_ID
+    ; Result status: Authenticated, Modified
+    AND CE.RESULT_STATUS_CD IN (25.00, 35.00)
+    AND CE.VALID_UNTIL_DT_TM > CNVTDATETIME(CURDATE, CURTIME)
+
+JOIN O WHERE O.ORDER_ID = MAE.TEMPLATE_ORDER_ID
+    AND O.ACTIVE_IND = 1
+    ; Filter for Parenteral Nutrition orders
+    AND O.HNA_ORDER_MNEMONIC = "Parenteral*"
+
+JOIN OI WHERE OI.ORDER_ID = O.ORDER_ID
+    AND OI.ACTION_SEQUENCE = O.LAST_INGRED_ACTION_SEQUENCE
+
+JOIN P WHERE O.PERSON_ID = P.PERSON_ID
+    ; Pediatric patients: 18 years old or younger
+    AND P.BIRTH_DT_TM > CNVTLOOKBEHIND("18,Y")
+    ; Exclude test patients
+    AND P.NAME_FULL_FORMATTED NOT LIKE "Zzztest,*"
+    AND P.NAME_FULL_FORMATTED NOT LIKE "Test Patient,*"
+
+JOIN PA WHERE PA.PERSON_ID = P.PERSON_ID
+    ; MRN alias type
+    AND PA.PERSON_ALIAS_TYPE_CD = 10.00
+    ; Rotunda Hospital MRN pool
+    AND PA.ALIAS_POOL_CD = 14504365.00
+    ; Active alias
+    AND PA.END_EFFECTIVE_DT_TM > SYSDATE
+    ; Optional: Filter by specific MRNs (comment out if not needed)
+    ; Uncomment the lines below and add specific MRNs to filter by
+   ;AND PA.ALIAS IN 
+    ;("MRN1",
+  	;"MRN2",
+  	;"MRN3",
+  	;"MRN4" etc. **remember to remove last comma from the final MRN
+  ;)
+
+JOIN E WHERE E.ENCNTR_ID = O.ENCNTR_ID
+    ; Rotunda Hospital facility code
+    AND E.LOC_FACILITY_CD = 14504354.00
+
+ORDER BY
+    NAME
+    , GENERIC_NAME
+    , ORDER_ID
+    , ADMIN_DT_TM
+
+WITH MAXREC = 20000, TIME = 300
+
+/*
+Code Set References:
+- Event Types (4000040): 8912520=Administered, 8912522=Not Done, 8912523=Not Given  
+- Result Status: 25=Authenticated, 35=Modified
+- Person Alias Type: 10=MRN
+- Facility Codes: 14504354=ROH, 14504352=NMH, 14504356=UHK, 14437846=CUMH
+- MRN Pool Codes: 14504365=ROT, 14504359=NMH, 18991198=SOUTH
+*/
