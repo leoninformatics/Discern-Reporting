@@ -1,3 +1,13 @@
+##################
+Title:            Simple_Med_Admin_Search
+Summary           Medicines administration search - update "O.HNA_ORDER_MNEMONIC" to look for specific medication
+Date Created:     01/06/2025
+Last Updated;     22/09/2025
+Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/Simple_Med_Admin_Search
+Email:            lohagan@rotunda.ie
+##################
+
+
 SELECT
 	NAME = (P.NAME_FULL_FORMATTED)
 	, MRN = (PA.ALIAS)
