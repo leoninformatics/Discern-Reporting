@@ -1,3 +1,14 @@
+##################
+Title:            Delivery List Simple
+Summary           Simple delivery list report to validate Business Objects output   
+Date Created:     01/06/2025
+Last Updated;     22/09/2025
+Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/DeliveryList_Simple
+Email:            lohagan@rotunda.ie
+##################
+
+
+
 SELECT DISTINCT
     NAME = P.NAME_FULL_FORMATTED
     , MRN = PA.ALIAS
