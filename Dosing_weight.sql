@@ -1,3 +1,4 @@
+/*
 ##################
 Title:            Dosing Weight Report
 Summary           Retrieves retrives dosing weights entered. Filter by event start date & Time, DOB & specific MRNs.     
@@ -6,6 +7,7 @@ Last Updated;     19/06/2025
 Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/Dosing_weight
 Email:            lohagan@rotunda.ie
 ##################
+*/
 
 SELECT
       NAME = (P.NAME_FULL_FORMATTED)
@@ -39,12 +41,12 @@ JOIN PA WHERE PA.PERSON_ID = P.PERSON_ID
   AND PA.PERSON_ALIAS_TYPE_CD = 10.00
   AND PA.END_EFFECTIVE_DT_TM > SYSDATE
   AND PA.ALIAS_POOL_CD = 14504365  ; Rotunda
-  AND PA.ALIAS IN ; Enter MRNs to check here
-  (
+  ;AND PA.ALIAS IN ; Enter MRNs to check here
+ ; (
   	;"MRN1",
   	;"MRN2",
   	;"MRN3" **remember to remove last comma from the final MRN
-  )
+ ; )
 
 JOIN E WHERE C.ENCNTR_ID = E.ENCNTR_ID
 
