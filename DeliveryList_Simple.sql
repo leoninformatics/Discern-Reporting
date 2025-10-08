@@ -1,3 +1,4 @@
+/*
 ##################
 Title:            Delivery List Simple
 Summary           Simple delivery list report to validate Business Objects output   
@@ -6,7 +7,7 @@ Last Updated;     22/09/2025
 Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/DeliveryList_Simple
 Email:            lohagan@rotunda.ie
 ##################
-
+*/
 
 
 SELECT DISTINCT
