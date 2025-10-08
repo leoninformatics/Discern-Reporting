@@ -1,3 +1,4 @@
+/*
 ##################
 Title:            PUQE Score Assessment
 Summary           Retrieves PUQE answers to Q's 1,2,3 and also calcualted score. Event start date & Time filters.     
@@ -5,6 +6,7 @@ Date Created:     16/06/2025
 Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/PUQE_Score_Assessment
 Email:            lohagan@rotunda.ie
 ##################
+/*
 
 SELECT
       NAME = (P.NAME_FULL_FORMATTED)
