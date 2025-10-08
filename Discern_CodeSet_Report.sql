@@ -1,3 +1,4 @@
+/*
 ##################
 Title:            Discern CodeSet Report
 Summary           Retrieves the codesets within Discern - First load codeset identifier. Menu Bar > Tools > Code Search. E.g. Code value 4 = "Person Alias Type"
@@ -6,6 +7,7 @@ Last Updated;     23/06/2025
 Github link:      https://github.com/leoninformatics/Discern-Reporting/edit/main/Discern_CodeSet_Report
 Email:            lohagan@rotunda.ie
 ##################
+*/
 
 SELECT 
 	CV1.CODE_VALUE,
